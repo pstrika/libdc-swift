@@ -202,7 +202,8 @@ public struct DiveProfilePoint {
     public let temperature: Double?
     public let pressure: Double?  // Primary (lowest-index) tank; convenience for single-tank dives
     public let tankPressures: [Int: Double]  // Live pressure (bar) per tank index; holds every transmitter of the sample
-    public let po2: Double?  // Oxygen partial pressure
+    public let po2: Double?  // Oxygen partial pressure (the computer's averaged/voted value)
+    public let po2Sensors: [Double]?  // Per-cell PPO2 in sensor order, when the driver reports cells
     // No dive computer reports inert-gas partial pressures; the parser never sets
     // these. Derive them from the gas mix instead.
     public let pn2: Double?
@@ -235,6 +236,7 @@ public struct DiveProfilePoint {
         pressure: Double? = nil,
         tankPressures: [Int: Double] = [:],
         po2: Double? = nil,
+        po2Sensors: [Double]? = nil,
         pn2: Double? = nil,
         phe: Double? = nil,
         events: [DiveEvent] = [],
@@ -257,6 +259,7 @@ public struct DiveProfilePoint {
         self.pressure = pressure
         self.tankPressures = tankPressures
         self.po2 = po2
+        self.po2Sensors = po2Sensors
         self.pn2 = pn2
         self.phe = phe
         self.events = events

@@ -165,6 +165,14 @@ public class GenericParser {
 
             case DC_SAMPLE_PPO2:
                 data.ppo2.append((sensor: value.ppo2.sensor, value: value.ppo2.value))
+                // Drivers emit the averaged reading with DC_SENSOR_NONE and then
+                // one reading per calibrated cell; keep them apart per sample so
+                // the profile point carries the displayed value, not the last cell.
+                if value.ppo2.sensor == 0xFFFFFFFF {
+                    data.samplePo2 = value.ppo2.value
+                } else {
+                    data.samplePo2Sensors[value.ppo2.sensor] = value.ppo2.value
+                }
 
             case DC_SAMPLE_CNS:
                 data.cns = value.cns * 100.0  // Convert to percentage
@@ -248,6 +256,8 @@ public class GenericParser {
             data.events = []
             data.rawEvents = []
             data.sampleDeco = nil
+            data.samplePo2 = nil
+            data.samplePo2Sensors = [:]
             hasOpenSample = false
         }
 
@@ -262,7 +272,10 @@ public class GenericParser {
                 temperature: data.temperature,
                 pressure: data.primaryTankPressure,
                 tankPressures: data.currentTankPressures,
-                po2: data.ppo2.last?.value,
+                po2: data.samplePo2 ?? (data.samplePo2Sensors.isEmpty ? nil
+                    : data.samplePo2Sensors.values.reduce(0, +) / Double(data.samplePo2Sensors.count)),
+                po2Sensors: data.samplePo2Sensors.isEmpty ? nil
+                    : data.samplePo2Sensors.sorted { $0.key < $1.key }.map { $0.value },
                 events: data.events,
                 rawEvents: data.rawEvents,
                 decoKind: kind,

@@ -64,7 +64,11 @@ public struct SampleData {
     
     // Rebreather data
     var setpoint: Double?               // Setpoint value
-    var ppo2: [(sensor: UInt32, value: Double)] = []  // PPO2 readings
+    var ppo2: [(sensor: UInt32, value: Double)] = []  // PPO2 readings (whole dive, in callback order)
+    // Per-sample PPO2, reset when the sample closes: the computer's own
+    // averaged/voted value (DC_SENSOR_NONE) and each cell by sensor index.
+    var samplePo2: Double?
+    var samplePo2Sensors: [UInt32: Double] = [:]
     var cns: Double?                    // CNS percentage
     
     // Last DC_SAMPLE_DECO the computer reported, kept for the dive-level summary.
