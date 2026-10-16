@@ -192,6 +192,7 @@ public class DiveLogRetriever {
         }
         
         let fingerprintData = Data(bytes: fingerprint, count: Int(fsize))
+        rawDiveHook?(Data(bytes: data, count: Int(size)))
 
         // Capture the FIRST dive's fingerprint (most recent dive on the device)
         // This is what we'll compare against on the next download
@@ -331,6 +332,10 @@ public class DiveLogRetriever {
     }
     
     private static var currentContext: CallbackContext?
+
+    /// Host hook: the raw bytes of every dive as the driver delivered them,
+    /// before parsing. Used by tooling to map undocumented header fields.
+    public static var rawDiveHook: ((Data) -> Void)?
     
     public static func retrieveDiveLogs(
             from devicePtr: UnsafeMutablePointer<device_data_t>,
